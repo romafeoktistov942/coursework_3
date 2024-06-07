@@ -27,3 +27,23 @@ def mask_card(card_number: str) -> str:
         [masked_number[i : i + 4] for i in range(0, len(masked_number), 4)]
     )
     return masked_number
+
+
+def get_transaction_info(transaction_params: str) -> str:
+    """
+    Retrieves and masks sensitive information from a transaction.
+
+    Args:
+        transaction_params (str): A string containing transaction parameters.
+
+    Returns:
+        str: A string containing the masked account number or card number.
+    """
+    number = transaction_params.split(" ")[-1]
+    system = transaction_params.split(" ")[:-1]
+
+    if len(number) != 16:
+        return " ".join(system) + " " + mask_account(number)
+    else:
+        return " ".join(system) + " " + mask_card(number)
+    
