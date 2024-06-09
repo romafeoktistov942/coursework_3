@@ -1,6 +1,4 @@
-import json
-import datetime as dt
-from helpers import *
+from src.helpers import *
 
 
 def main():
@@ -9,52 +7,15 @@ def main():
     It reads transactions from a JSON file, sorts them by date in descending order, 
     filters out only the executed transactions and prints the latest 5 transactions.
     """
-    with open("operations.json", "r") as data:
-        transactions = json.loads(data.read())
+    all_operations = get_operations('operations.json')
+    sorted_operations = sort_operations_by_date(all_operations)
+    executed_operations = get_only_executed(sorted_operations)
+    last_five_operations = executed_operations[:5]
 
-    transactions = sorted(
-        transactions,
-        key=lambda x: (
-            dt.datetime.strptime(x.get("date", ""), "%Y-%m-%dT%H:%M:%S.%f")
-            if x.get("date")
-            else dt.datetime.min
-        ),
-        reverse=True,
-    )
-
-    transactions = [tr for tr in transactions if tr.get("state") == "EXECUTED"][
-        :5
-    ]
-
-    for tr in transactions:
-
-        # первая строчка
-
-        operation_info = (
-            dt.datetime.strptime(tr["date"], "%Y-%m-%dT%H:%M:%S.%f").strftime(
-                "%d.%m.%Y"
-            )
-            + " "
-            + tr["description"]
-        )
-
-        if tr.get("from"):
-            operation_route = (
-                get_transaction_info(tr.get("from"))
-                + " -> "
-                + get_transaction_info(tr.get("to"))
-            )
-        else:
-            operation_route = get_transaction_info(tr.get("to"))
-
-        print(operation_info)
-        print(operation_route)
-        print(
-            tr["operationAmount"]["amount"]
-            + " "
-            + tr["operationAmount"]["currency"]["name"],
-            end="\n\n",
-        )
+    
+    for operation in last_five_operations:
+        formated_operation_info = format_operation_to_output(operation)
+        print(formated_operation_info, end='\n\n') 
 
 
 if __name__ == "__main__":
