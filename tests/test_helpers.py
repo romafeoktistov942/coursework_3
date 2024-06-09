@@ -1,5 +1,5 @@
 
-from helpers import mask_account, mask_card, get_transaction_info
+from src.helpers import mask_account, mask_card, get_transaction_info
 
 def test_mask_account():
     assert mask_account("72731966109147704472") == "**4472"
