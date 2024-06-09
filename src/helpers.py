@@ -2,13 +2,20 @@ import json
 from datetime import datetime as dt
 
 
-def get_operations(file_name: str) -> dict:
+def get_operations(file_name: str) -> list:
     with open(f"data/{file_name}", "r") as data:
         operations = json.loads(data.read())
     return operations
 
 
-def sort_operations_by_date(all_operations: dict) -> dict:
+def get_only_executed(sorted_operations: list) -> list:
+    executed_operations = [
+        tr for tr in sorted_operations if tr.get("state") == "EXECUTED"
+    ]
+    return executed_operations
+
+
+def sort_operations_by_date(all_operations: list) -> list:
     sorted_operations = sorted(
         all_operations,
         key=lambda x: (
@@ -20,36 +27,6 @@ def sort_operations_by_date(all_operations: dict) -> dict:
     )
 
     return sorted_operations
-
-def format_operation_to_output(operation: dict) -> str:
-    first_line = (
-            dt.strptime(operation["date"], "%Y-%m-%dT%H:%M:%S.%f").strftime(
-                "%d.%m.%Y"
-            )
-            + " "
-            + operation["description"] + '\n'
-        )
-    
-    if operation.get("from"):
-        second_line = (
-            get_transaction_info(operation.get("from"))
-            + " -> "
-            + get_transaction_info(operation.get("to"))
-            + '\n'
-        )
-    else:
-        second_line = get_transaction_info(operation.get("to")) + '\n'
-
-    third_line = operation["operationAmount"]["amount"] +  " " + operation["operationAmount"]["currency"]["name"]
-
-    return first_line + second_line + third_line
-
-
-def get_only_executed(sorted_operations):
-    executed_operations = [
-        tr for tr in sorted_operations if tr.get("state") == "EXECUTED"
-    ]
-    return executed_operations
 
 
 def mask_account(account_number: str) -> str:
@@ -100,3 +77,31 @@ def get_transaction_info(transaction_params: str) -> str:
         return " ".join(system) + " " + mask_account(number)
     else:
         return " ".join(system) + " " + mask_card(number)
+    
+def format_operation_to_output(operation: dict) -> str:
+    first_line = (
+        dt.strptime(operation["date"], "%Y-%m-%dT%H:%M:%S.%f").strftime(
+            "%d.%m.%Y"
+        )
+        + " "
+        + operation["description"]
+        + "\n"
+    )
+
+    if operation.get("from"):
+        second_line = (
+            get_transaction_info(operation.get("from"))
+            + " -> "
+            + get_transaction_info(operation.get("to"))
+            + "\n"
+        )
+    else:
+        second_line = get_transaction_info(operation.get("to")) + "\n"
+
+    third_line = (
+        operation["operationAmount"]["amount"]
+        + " "
+        + operation["operationAmount"]["currency"]["name"]
+    )
+
+    return first_line + second_line + third_line
